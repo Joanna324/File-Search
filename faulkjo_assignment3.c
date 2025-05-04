@@ -227,7 +227,7 @@ int main() {
                     break;
                 } else if (numberChoice2 == 3) {
                     char inputFileName [300];
-                    int fileFound = 0;
+                    int found = 0;
 
                     printf("Enter the complete file name:\n");
                     scanf("%s", inputFileName);
@@ -245,7 +245,7 @@ int main() {
                     while ((entry = readdir(currDir)) != NULL) {
                         if (stat(entry->d_name, &dirStat) == 0) {
                             if (strcmp(entry->d_name, inputFileName) == 0) {
-                                fileFound = 1; // found match
+                                found = 1;
                                 printf("Now processing the chosen file named: %s\n", inputFileName);
 
                                 randomNumber = rand() % 100000;
@@ -276,7 +276,7 @@ int main() {
                         }
                     }
 
-                    if (!fileFound) {
+                    if (!found) {
                         printf("The File '%s' was not found. Try again.\n", inputFileName);
                         continue;                       // re-loop
 

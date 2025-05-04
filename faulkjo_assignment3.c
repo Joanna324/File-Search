@@ -282,7 +282,7 @@ int main() {
 
                 
                     break;  //break loop
-
+                    }
 
                 } else {
                     printf("Invalid value. Please select 1, 2, or 3.\n");

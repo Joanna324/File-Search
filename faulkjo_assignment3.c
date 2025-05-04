@@ -9,6 +9,13 @@
 
 
 int main() {
+
+    //struct for file size -- mayb runnecesary? 
+    //Storees -- the details about the files
+    static struct stat largestFile; 
+
+
+
     DIR* currDir;
     struct dirent *entry;
     struct stat dirStat;
@@ -24,6 +31,9 @@ int main() {
     while ((entry = readdir(currDir)) != NULL) {
         // Get metadata info about the entries (in dirStat)
         if (stat(entry->d_name, &dirStat) == 0) {
+            // Calculate the length of the file name
+            size_t len = strlen(entry->d_name);
+
             // Print a confirmation message
             printf("Directory properly accessed\n");
         } else {
@@ -34,9 +44,19 @@ int main() {
 
     // Main prompt - menu
     int numberChoice = 0;
+    off_t largestSize = 0;
+
+    //allocate file name for max file: 
+    char largestFileString[200];
+    
+    //new directory
+    // char newDirectory = "frank.movies";
+
+
+  
 
     while (1) {
-        // Display the menu
+        // Menu
         printf("1. Select file to process\n");
         printf("2. Exit the program\n");
         printf("Enter a choice 1 or 2:\n");
@@ -75,7 +95,7 @@ int main() {
                         return EXIT_FAILURE;
                     }
 
-                    // Read through em
+                    // Read through em - Adapted from NOTES
                     while ((entry = readdir(currDir)) != NULL) {
                         // get the data info.
                         if (stat(entry->d_name, &dirStat) == 0) {
@@ -83,6 +103,33 @@ int main() {
                             if (strncmp(entry->d_name, "movies_", 7) == 0) {
                                 // make sure the file is found.
                                 printf("File found: %s\n", entry->d_name);
+                                //is it  a file?
+                                if (S_ISREG(dirStat.st_mode)) {
+                                    printf("%s modified at %ld\n", entry->d_name, dirStat.st_mtime);
+                                    //Is it a csv?
+                                    if (strstr(entry->d_name, ".csv") != NULL) {
+                                        printf("This is a CSV file: %s\n", entry->d_name);
+                                        //locate the largest one?
+                                    if (dirStat.st_size >= largestFile.st_size ){
+                                        largestFile.st_size = dirStat.st_size;
+                                        strcpy(largestFileString, entry->d_name);
+                                        printf("Now processing the chosen file named ...%s\n",largestFileString );
+
+
+                                        //Create directory 
+                                        //Creating Directory - retunr 0 on success- Adapted from notes
+                                    // int mkdir(const char *pathname, mode_t mode); //0777 v 0755
+                                        //if directory exist, generate a new directory?
+                                    } 
+                                        
+
+
+                                    }
+                                }
+                                
+
+
+
                             }
                         } else {
                             perror("Failed to get file metadata");
@@ -108,3 +155,13 @@ int main() {
     
     return EXIT_SUCCESS;
 }
+
+
+
+//Reference 
+// https://stackoverflow.com/questions/7430248/creating-a-new-directory-in-c
+// https://stackoverflow.com/questions/40163270/what-is-s-isreg-and-what-does-it-do#:~:text=S_ISREG()%20is%20a%20macro,stat)%20is%20a%20regular%20file.
+// https://stackoverflow.com/questions/12275831/why-is-the-st-size-field-in-struct-stat-signed
+// https://man7.org/linux/man-pages/man2/mkdir.2.html
+// https://man7.org/linux/man-pages/man7/inode.7.html
+// https://stackoverflow.com/questions/586928/how-should-i-print-types-like-off-t-and-size-t

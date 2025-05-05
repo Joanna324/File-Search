@@ -315,27 +315,39 @@ int main() {
             printf("Invalid value. Please select 1, 2, or 3.\n");
             continue; }
 
-        // onto directory creation.
-        while (1) {
-            randomNumber = rand() %100000;
-            sprintf(createString, "%d",randomNumber);
-            snprintf(pathname, sizeof(pathname), "chaudhrn.movies.%s", createString);
-if (!opendir(pathname)) {
-                break; }
-        }
+       
 
-        //convert movies lines into file.
-        if (mkdir(pathname,0777)== 0) {
-            printf("Created directory with name %s\n", pathname);
+        // onto directory creation.
+        char createString[200];
+        DIR* testDir = NULL;
+
+        randomNumber = rand() % 100000;
+        sprintf(createString, "%d", randomNumber);
+        strcpy(pathname, "faulkjo.movies.");
+        strcat(pathname, createString);
+        
+        testDir = opendir(pathname);
+        while (testDir) {
+            closedir(testDir);
+        randomNumber = rand() %100000;
+            sprintf(createString, "%d", randomNumber);
+            strcpy(pathname, "faulkjo.movies.");
+        strcat(pathname,createString);
+            testDir = opendir(pathname);
+        }
+        
+        // Create the directory
+        if (mkdir(pathname, 0777) == 0) {
+             printf("Created directory with name %s\n", pathname);
             intoFile(head, pathname);
-        } else { perror("unable to create directory");
- }
+        } else {
+            perror("Failed");
+        }
     }
 
     closedir(currDir);
     return EXIT_SUCCESS;
 }
-
 //Reference 
 // https://stackoverflow.com/questions/7430248/creating-a-new-directory-in-c
 // https://stackoverflow.com/questions/40163270/what-is-s-isreg-and-what-does-it-do#:~:text=S_ISREG()%20is%20a%20macro,stat)%20is%20a%20regular%20file.

@@ -140,7 +140,7 @@ void intoFile(LinkedListNode *head,const char *dirName) {
         snprintf(fileName,sizeof(fileName), "./%s/%d.txt", dirName, currentFilm->film->year);
 
         // Open & append
-        fd = open(fileName,O_RDWR | O_CREAT | O_APPEND,0644);
+        fd = open(fileName,O_RDWR | O_CREAT | O_APPEND,0750);
         if (fd == -1) {
             printf("open() failed on \"%s\"\n", fileName);
             perror("Error");

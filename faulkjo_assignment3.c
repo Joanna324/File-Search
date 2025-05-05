@@ -215,12 +215,12 @@ int main() {
             break;
         }if (numberChoice != 1) {
             printf("You entered an incorrect option. Try again.\n");
-            continue;
-        }
+            continue; }
 
-        //Next menu.
+            while (1){
+            //Next menu.
         int numberChoice2 = 0;
-        printf("\nWhich file you want to process?\n");
+        printf("Which file you want to process?\n");
         printf("Enter 1 to pick the largest file\n");
         printf("Enter 2 to pick the smallest file\n");
         printf("Enter 3 to specify the name of a file\n");
@@ -264,7 +264,7 @@ int main() {
      // largest file
        printf("Now processing the chosen file named %s\n", largestFileString);
             processMovieFile(largestFileString, &head);
-
+            break; 
         // option2 
         } else if (numberChoice2 == 2) {
             while ((entry = readdir(currDir)) != NULL) {
@@ -287,7 +287,7 @@ int main() {
      // smallest file
                 printf("Now processing the chosen file named %s\n", smallestFileString);
             processMovieFile(smallestFileString, &head);
-
+     break; 
         ///option3
         } else if (numberChoice2 == 3) {
             printf("Enter the complete file name:\n");
@@ -311,11 +311,12 @@ int main() {
                 printf("The file %s was not found. Try again.\n", inputFileName);
                 continue;                               // re-loop
             }
+            break; 
         } else {
             printf("Invalid value. Please select 1, 2, or 3.\n");
             continue; }
 
-       
+        }
 
         // onto directory creation.
         char createString[200];

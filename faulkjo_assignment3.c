@@ -185,7 +185,7 @@ int main() {
     off_t largestSize = 0;
     off_t smallestSize = __LONG_MAX__;
 
-    char createString[200];
+   
  
      // directory path.
     char pathname[300];
@@ -309,6 +309,7 @@ int main() {
 
             if (!found) {
                 printf("The file %s was not found. Try again.\n", inputFileName);
+        
                 continue;                               // re-loop
             }
         } else {
@@ -316,20 +317,31 @@ int main() {
             continue; }
 
         // onto directory creation.
-        while (1) {
-            randomNumber = rand() %100000;
-            sprintf(createString, "%d",randomNumber);
-            snprintf(pathname, sizeof(pathname), "chaudhrn.movies.%s", createString);
-if (!opendir(pathname)) {
-                break; }
-        }
+        char createString[200];
+        DIR* testDir = NULL;
 
-        //convert movies lines into file.
-        if (mkdir(pathname,0777)== 0) {
-            printf("Created directory with name %s\n", pathname);
+        randomNumber = rand() % 100000;
+        sprintf(createString, "%d", randomNumber);
+        strcpy(pathname, "faulkjo.movies.");
+        strcat(pathname, createString);
+        
+        testDir = opendir(pathname);
+        while (testDir) {
+            closedir(testDir);
+        randomNumber = rand() %100000;
+            sprintf(createString, "%d", randomNumber);
+            strcpy(pathname, "faulkjo.movies.");
+        strcat(pathname,createString);
+            testDir = opendir(pathname);
+        }
+        
+        // Create the directory
+        if (mkdir(pathname, 0777) == 0) {
+             printf("Created directory with name %s\n", pathname);
             intoFile(head, pathname);
-        } else { perror("unable to create directory");
- }
+        } else {
+            perror("Failed");
+        }
     }
 
     closedir(currDir);

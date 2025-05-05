@@ -163,66 +163,44 @@ int generateRandoms(int min, int max) {
     }
 
 //Main
-
 int main() {
-
-    //Stores Metadata/ details about the files
-    static struct stat largestFile; 
-    static struct stat smallestFile; 
-
-    //Adapted From Notes:"Exploration:Directories"  
+    // Stores metadata/details about the files
     DIR* currDir;
     struct dirent *entry;
     struct stat dirStat;
 
-    // Open the current directory
-    currDir= opendir(".");
+    
+    //Adapted From Notes:"Exploration:Directories" 
+    currDir = opendir(".");
     if (currDir == NULL) {
-        printf("Cannot open directory!\n");
-        exit(EXIT_FAILURE);
-    }
-    // Read through the directory entries
-    while ((entry = readdir(currDir)) != NULL) {
-
-        // Get metadata info about the entries (in dirStat)
-        if (stat(entry->d_name, &dirStat) == 0) {
-            // Calculate the length of the file name
-            size_t len = strlen(entry->d_name);
-
-            // printf("Directory properly accessed\n");
-
-        } else {
-            printf("Cannot get metadata\n");
-        }
+        perror("Cannot open directory");
+        return EXIT_FAILURE;
     }
 
-
-    //Parse-Process File
-    LinkedListNode *head =NULL;
+    LinkedListNode *head = NULL;
     int numberChoice = 0;
-    int yearSelected;
-    char languageSelected[1000];
 
-    // Main prompt - menu
-    off_t largestSize= 0;
-    off_t smallestSize = 0;
-    
 
-    //allocate file name for max file: 
-    char largestFileString[200];
-    //Allocate file name for max file: 
-    char smallestFileString[200];
-    
-    // directory path.
+    // Declare variables for linked list, menu options, and file size tracking
+    off_t largestSize = 0;
+    off_t smallestSize = __LONG_MAX__;
+
+    char createString[200];
+ 
+     // directory path.
     char pathname[300];
-
+    char inputFileName[300];
+    
+    
     //For my random seed generator
-    srand(time(0)); 
-    int randomNumber =generateRandoms(0, 9999);
+    srand(time(0));
+    int randomNumber;
 
+   
 
+    
     while (1) {
-        // Menu
+        //Menu
         printf("1. Select file to process\n");
         printf("2. Exit the program\n");
         printf("Enter a choice 1 or 2:\n");
@@ -231,238 +209,132 @@ int main() {
         scanf("%d", &numberChoice);
         getchar();
 
-        // Exit the program
+        // Exit the program if the user selects option 2
         if (numberChoice == 2) {
             printf("Exiting program..bye:).\n");
-            exit(0);
-        } else if (numberChoice == 1) {
-            int numberChoice2 = 0; 
+            break;
+        }if (numberChoice != 1) {
+            printf("You entered an incorrect option. Try again.\n");
+            continue;
+        }
 
-            //Next menu.
-            while (1) {
-                printf("Which file you want to process?\n");
-                printf("Enter 1 to pick the largest file\n");
-                printf("Enter 2 to pick the smallest file\n");
-                printf("Enter 3 to specify the name of a file\n");
-                printf("Enter a choice from 1 to 3:\n");
+        //Next menu.
+        int numberChoice2 = 0;
+        printf("\nWhich file you want to process?\n");
+        printf("Enter 1 to pick the largest file\n");
+        printf("Enter 2 to pick the smallest file\n");
+        printf("Enter 3 to specify the name of a file\n");
 
-                // take input
-                scanf("%d",&numberChoice2);
-                getchar();                      //Clear it
+        // Get user's choice for file processing
+        scanf("%d", &numberChoice2);
+        getchar();                                      //Clear it
 
-                if (numberChoice2 == 1) {
-                    // make sure directory was closed
-                    closedir(currDir);          
-                    currDir = opendir("."); 
-                    if (currDir == NULL) {
-                        return EXIT_FAILURE;
-                    }
+        // Reset directory inside the loop
+        rewinddir(currDir);
+        largestSize = 0;
+        smallestSize = __LONG_MAX__;
+        //allocate file name for max file: 
+        char largestFileString[300] = "";
+        //allocate file name for max file: 
+        char smallestFileString[300] = "";
 
-                    // Read through em -   
-                    //Adapted From Notes:"Exploration:Directories"  
-                    while ((entry = readdir(currDir)) != NULL) {
-                        // get the data info.
-                        if (stat(entry->d_name, &dirStat) == 0) {
-                            // find "movies_" file
-                            if (strncmp(entry->d_name, "movies_", 7) == 0) {
-                                // printf("File : %s\n", entry->d_name);
-                                //is it  a file?
-                                if (S_ISREG(dirStat.st_mode)) {
-                                    // printf("%s info %ld\n", entry->d_name, dirStat.st_mtime);
-                                    //check if file is a csv?
-                                    if (strstr(entry->d_name, ".csv") != NULL) {
-                                        // printf(" CSV file: %s\n", entry->d_name);
-                                        //locate the largest one?
-                                    if (dirStat.st_size >= largestFile.st_size ){
-                                        largestFile.st_size= dirStat.st_size;
-                                        strcpy(largestFileString, entry->d_name);
-
-                                        printf("Now processing the chosen file named ...%s\n",largestFileString );
-                                        //Parse date 
-                                         
-                                        // Process the movie file into structs and add them to a linked list
-                                        processMovieFile(largestFileString, &head);
-
-                                            // Generate a random number and create directory
-                                            randomNumber = rand() %99999 +0;
-                                            char createString[10];
-                                            sprintf(createString, "%d", randomNumber);
-                                            strcpy(pathname, "movies");
-                                            strcat(pathname,createString);
-
-                                            DIR* testDir = opendir(pathname);
-                                            if (testDir) {
-                                                // Directory exists, close it - generate a new one
-                                                printf("Directory %s already exists. New directoty loading\n", pathname);
-                                                closedir(testDir);
-                                                randomNumber = rand() % 99999 +0;
-                                                sprintf(createString, "%d", randomNumber);
-                                                strcpy(pathname, "faulkjo.movies");
-                                                strcat(pathname, createString);
-                                            }
-                                            if (mkdir(pathname, 0777) == 0) {
-                                                printf("Created directory with name %s\n", pathname);
-                                                intoFile(head,pathname);
-                                            } else {
-                                                printf("Issue?\n");
-                                            }
-                                        }
-                                    }
+         // Read through em -   
+        //Adapted From Notes:"Exploration:Directories"  
+        if (numberChoice2 == 1) {
+            while ((entry = readdir(currDir)) != NULL) {
+                if (stat(entry->d_name, &dirStat) == 0) {
+                    if (S_ISREG(dirStat.st_mode)) {
+                    if (strncmp(entry->d_name, "movies_", 7) == 0) {
+                            if (strstr(entry->d_name, ".csv") != NULL) {
+                                if (dirStat.st_size >largestSize) {
+                            largestSize= dirStat.st_size;
+                            strcpy(largestFileString, entry->d_name);
                                 }
+                         }
+                    }
+                    }
+         }
+            }
+//check foor empty string.
+                            if (strlen(largestFileString)== 0) {
+                            printf("movie files not found.\n");
+                                continue;
+            }
+
+     // largest file
+       printf("Now processing the chosen file named %s\n", largestFileString);
+            processMovieFile(largestFileString, &head);
+
+        // option2 
+        } else if (numberChoice2 == 2) {
+            while ((entry = readdir(currDir)) != NULL) {
+                if (stat(entry->d_name,&dirStat) == 0) {
+                 if (S_ISREG(dirStat.st_mode)) {
+                if (strncmp(entry->d_name,"movies_", 7) == 0) {
+                    if (strstr(entry->d_name,".csv") != NULL) {
+                                if (dirStat.st_size < smallestSize) {
+                                smallestSize=dirStat.st_size;
+                                    strcpy(smallestFileString, entry->d_name);
                             }
-
-
-                        } else {
-                            printf("Cannot get metadata\n");
-                        }
-                    }
-
-                    break;                     // exit 
-                } else if (numberChoice2 == 2) {
-            
-                    // open the directory again to search - make sure it was closed
-                    closedir(currDir);          
-                    currDir = opendir("."); 
-
-                    if (currDir == NULL) {
-                        return EXIT_FAILURE;
-                    }
-
-                    // Read through em - Adapted From Notes:"Exploration:Directories" 
-                    while ((entry = readdir(currDir)) != NULL) {
-                        if (stat(entry->d_name, &dirStat) == 0) {
-                            if (strncmp(entry->d_name, "movies_", 7) == 0) {
-                                // printf("File found: %s\n", entry->d_name);
-                                if (S_ISREG(dirStat.st_mode)) {
-                                    // printf("%s info at %ld\n", entry->d_name, dirStat.st_mtime);
-                                    if (strstr(entry->d_name, ".csv") != NULL) {
-                                        // printf("CSV file: %s\n", entry->d_name);
-                                    if (dirStat.st_size <= smallestFile.st_size){
-                                        smallestFile.st_size = dirStat.st_size;
-                                        strcpy(smallestFileString, entry->d_name);
-                                        printf("Now processing the chosen file named ...%s\n",smallestFileString);
-
-                                        // Process the movie file into structs and add them to a linked list
-                                        processMovieFile(smallestFileString, &head);
-                                        
-                                            // random number
-                                            randomNumber = rand()% 99999 + 0; 
-                                            char createString[10];
-                                            sprintf(createString, "%d", randomNumber);
-                                            strcpy(pathname, "movies_");
-                                            strcat(pathname, createString);
-
-                                            DIR* testDir= opendir(pathname);
-                                            if (testDir) {
-    
-                                                // Directory exists, close it and generate a new one
-                                                printf("Directory %s already exists. New directoty loading.\n", pathname);
-                                                closedir(testDir);
-                                                randomNumber = rand() % 100000; 
-                                                sprintf(createString, "%d", randomNumber);
-                                                strcpy(pathname, "faulkjo.movies");
-                                                strcat(pathname, createString);
-                                            }
-
-                                            // Create the new directory
-                                            if (mkdir(pathname, 0777) == 0) {
-                                                printf("Created directory with name %s\n", pathname);
-                                                intoFile(head, pathname);
-                                                
-
-
-                                            } else {
-                                                perror("Failed directory");
                             }
-                                    }
-                                 }
-                                }
-                            }
-
-
-                        } else {
-                            perror("Cannot get metadata");
-                        }
                     }
+                  }
+        }
+            }         if (strlen(smallestFileString) == 0) {
+            printf("The file was not found..\n");
+            continue; }
 
-                    break;
-                } else if (numberChoice2 == 3) {
-                    char inputFileName [300];
-                    int found = 0;
+     // smallest file
+                printf("Now processing the chosen file named %s\n", smallestFileString);
+            processMovieFile(smallestFileString, &head);
 
-                    printf("Enter the complete file name:\n");
-                    scanf("%s", inputFileName);
-                    getchar();
+        ///option3
+        } else if (numberChoice2 == 3) {
+            printf("Enter the complete file name:\n");
+            scanf("%s", inputFileName);
+            getchar();    
 
-                    closedir(currDir);          
-                    currDir =opendir("."); 
+            int found = 0;
+        while ((entry = readdir(currDir)) != NULL) {
+             if (stat(entry->d_name, &dirStat) == 0) {
+                       if (strcmp(entry->d_name,inputFileName) == 0) {
+                        if (S_ISREG(dirStat.st_mode)) {
+                            found = 1;
+                            printf("Now processing the chosen file named %s\n", inputFileName);
+                            processMovieFile(inputFileName,&head);
+                            break; }
+                            
+                }}
+         }
 
-                    if (currDir == NULL) {
-                        perror("Error reopening DIRECTORY");
-                        return EXIT_FAILURE;
-                    }
-
-                    // Read through em -*Adapted from Exploration Notes
-                    while ((entry = readdir(currDir)) != NULL) {
-                        if (stat(entry->d_name, &dirStat) ==0) {
-                            if (strcmp(entry->d_name, inputFileName) == 0) {
-                                found = 1;
-                                printf("Now processing the chosen file named: %s\n", inputFileName);
-                                // Process the movie file into structs and add them to a linked list
-                                processMovieFile(inputFileName, &head);
-
-                                randomNumber = rand() % 100000;
-                                char createString[10];
-                                sprintf(createString, "%d",randomNumber);
-                                strcpy(pathname, "movies_");
-                                strcat(pathname, createString);
-
-                                DIR* testDir = opendir(pathname);
-                                if (testDir) {
-                                    printf("Directory %s already exists. Generating new one...\n", pathname);
-                                    closedir(testDir);
-                                    randomNumber = rand() % 100000;
-                                    sprintf(createString, "%d", randomNumber);
-                                    strcpy(pathname, "faulkjo.movies");
-                                    strcat(pathname, createString);
-                                }
-
-                                // Create the new directory
-                                if (mkdir(pathname,0777) == 0) {
-                                    printf("Created directory with name %s \n", pathname);
-                                    intoFile(head, pathname);
-                                } else {
-                                    perror("Failed");
-                                }
-
-                                break; 
-                            }
-                        }
-       }
-
-                    if (!found) {
-                        printf("The File '%s' was not found. Try again.\n", inputFileName);
-                        continue;                       // re-loop
-
-                
-                    break;
-                    }
-
-                } else {
-                    printf("Invalid value. Please select 1, 2, or 3.\n");
-                }
+            if (!found) {
+                printf("The file %s was not found. Try again.\n", inputFileName);
+                continue;                               // re-loop
             }
         } else {
-            printf("You entered an incorrect option. Try again.\n");
+            printf("Invalid value. Please select 1, 2, or 3.\n");
+            continue; }
+
+        // onto directory creation.
+        while (1) {
+            randomNumber = rand() %100000;
+            sprintf(createString, "%d",randomNumber);
+            snprintf(pathname, sizeof(pathname), "chaudhrn.movies.%s", createString);
+if (!opendir(pathname)) {
+                break; }
         }
+
+        //convert movies lines into file.
+        if (mkdir(pathname,0777)== 0) {
+            printf("Created directory with name %s\n", pathname);
+            intoFile(head, pathname);
+        } else { perror("unable to create directory");
+ }
     }
-   
+
     closedir(currDir);
-    
     return EXIT_SUCCESS;
 }
-
-
 
 //Reference 
 // https://stackoverflow.com/questions/7430248/creating-a-new-directory-in-c
@@ -472,6 +344,7 @@ int main() {
 // https://man7.org/linux/man-pages/man7/inode.7.html
 // https://stackoverflow.com/questions/586928/how-should-i-print-types-like-off-t-and-size-t
 //https://www.geeksforgeeks.org/bubble-sort-algorithm/
+//https://man7.org/linux/man-pages/man3/rewinddir.3.html
 
 ///Creaet a directory with name....your_onid.movies.random#'s
 ///random is a random number between 0 and 99999 (both numbers inclusive)
